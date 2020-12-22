@@ -1,16 +1,19 @@
 # Title
 
 ## Description
+This example script is a companion to the tutorial "Automate Operations with the Command-Line Interface (CLI)".
+For complete information, see the tutorial on developers.sap.com.
+
+With this example for the CLI for SAP Cloud Platform, you can automate the setting up of new development environments.
+This includes the creation of a directory, subaccounts and entitlements, as well as a Cloud Foundry space and an instance of the HANA Cloud service in the space.
 
 ## Requirements
+You should have a Trail account on SAP Cloud Platform.
+You need to have the cf CLI installed.
+Since the script is a bash shell script, an UNIX-like environment is required, such as macOS or Linux.
 
 ## Download and Installation
-
-## Known Issues
-
-## How to obtain support
-
-## Contributing
+After downloading, change the file extension to ´.sh´.
 
 ## License
 Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved. This project is licensed under the Apache Software License, version 2.0 except as noted otherwise in the [LICENSE](LICENSES/Apache-2.0.txt) file.
