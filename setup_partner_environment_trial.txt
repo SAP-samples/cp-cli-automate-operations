@@ -1,0 +1,236 @@
+#!/usr/bin/env bash
+
+# Stop executing in case of errors
+set -o errexit
+
+# These lines declare global variables that will be used in the script.
+declare region="<enter your trial region, e.g., eu10, us10, ap21>"
+declare global_account_subdomain="<enter your trial global account subdomain, see below where it is located>"
+declare directory_name="<enter a name for the directory of the new project, e.g., Project X>"
+declare directory_description="<enter a description for the directory of the new project, e.g., Directory for project X of partner Y>"
+declare contact_person="<enter the email address of your partner company’s contact person>"
+declare department="<enter the department relevant for your new project, e.g., HR>"
+declare subaccounts="dev test prod"
+declare space="<enter a name for the space. e.g., dev>"
+declare delay=15
+
+log() {
+  # Print the input text in yellow.
+  local yellow='\033[0;33m'
+  local no_color='\033[0m'
+  echo -e "${yellow}$*${no_color}"
+}
+
+login_sapcp() {
+
+  local user=$1
+  local pass=$2
+  local region=$3
+  local subdomain=$4
+
+  log Authenticating with SAP Cloud Platform
+  sapcp login \
+    --url "https://cpcli.cf.${region}.hana.ondemand.com" \
+    --subdomain "$subdomain" \
+    --user "$user" \
+    --password "$pass"
+
+}
+
+create_directory() {
+
+  local subdomain=$1
+  local name=$2
+  local desc=$3
+  local admin=$4
+  local features=DEFAULT,ENTITLEMENTS,AUTHORIZATIONS
+  local result
+
+  result=$(
+    sapcp create accounts/directory \
+      --global-account "$subdomain" \
+      --features "$features" \
+      --display-name "$name" \
+      --description "$desc" \
+      --directory-admins "[\"$admin\"]" \
+      --custom-properties "$(printf '[{"key": "Contact Person", "value": "%s"}, {"key": "Department", "value": "%s"}]' "$contact_person" "$department")"
+  )
+
+  # Return directory ID
+  awk '/^directory id:/ { print $NF }' <<< "$result"
+
+}
+
+assign_distributed_entitlement() {
+
+  local directory=$1
+  local service=$2
+  local plan=$3
+
+  log "Initiating distributed entitlement assignments for $service / $plan ..."
+  sapcp assign accounts/entitlement \
+    --to-directory "$directory" \
+    --for-service "$service" \
+    --plan "$plan" \
+    --distribute \
+    --auto-assign \
+    --enable
+
+}
+
+generate_id() {
+  # Generate a random ID
+  date | md5 | head -c 8
+}
+
+create_subaccount() {
+
+  local name=$1
+  local region=$2
+  local email=$3
+  local directory_id=$4
+  local subdomain
+  local result
+
+  subdomain=$(generate_id)
+
+  result=$(
+    sapcp create accounts/subaccount \
+      --display-name "$name" \
+      --subdomain "$subdomain" \
+      --region "$region" \
+      --subaccount-admins "[\"$email\"]" \
+      --directory "$directory_id"
+  )
+
+  # Return subaccount ID
+  awk '/^subaccount id:/ { print $NF }' <<< "$result"
+
+}
+
+
+create_cf_environment() {
+
+    local subaccount=$1
+    local subaccount_id=$2
+    local display_name=$3
+
+    log "Initiating CF environment creation for $subaccount ..."
+    sapcp create accounts/environment-instance \
+      --subaccount "$subaccount_id" \
+      --environment cloudfoundry \
+      --display-name "$display_name"
+	  --service cloudfoundry \
+	  --plan standard
+
+}
+
+
+login_cf() {
+
+  local user=$1
+  local pass=$2
+  local region=$3
+  local org=$4
+
+  log Authenticating with Cloud Foundry
+  cf login \
+    -a "https://api.cf.${region}.hana.ondemand.com" \
+    -o "$org" \
+    -u "$user" \
+    -p "$pass"
+
+}
+
+
+create_new_space() {
+
+  local org=$1
+  local space=$2
+
+  log "Creating new space $space in org $org ..."
+  cf create-space "$space" -o "$org"
+  # Since the creation is asynchronous, use sleep for simplicity
+  sleep "$delay"
+  cf target -o "$org" -s "$space"
+
+}
+
+
+main() {
+
+  # Define local variables
+  local user pass directory_id subaccount subaccount_id org
+
+  # Obtain credentials for SAP CP / CF
+  echo Please enter your SAP Cloud Platform credentials
+  read -r -p 'Email: ' user
+  read -r -s -p 'Password: ' pass
+  echo
+
+  # Authenticate with SAP Cloud Platform
+  login_sapcp "$user" "$pass" "$region" "$global_account_subdomain"
+
+  # Create new directory
+  log Initiating directory creation ...
+  directory_id=$(
+    create_directory \
+      "$global_account_subdomain" \
+      "$directory_name" \
+      "$directory_description" \
+      "$user"
+  )
+  log "Directory creation initiated, ID is $directory_id"
+
+  # Assign two service entitlements to the directory, that will be auto assigned to its subaccounts
+  assign_distributed_entitlement "$directory_id" alert-notification standard
+  assign_distributed_entitlement "$directory_id" hana-cloud-trial hana
+
+  # Create the dev, test, prod subaccounts in the directory
+  log Initiating creation of subaccounts ...
+  for subaccount in $subaccounts; do
+
+    subaccount_id=$(create_subaccount "$subaccount" "$region" "$user" "$directory_id")
+    log "Subaccount $subaccount creation initiated, ID is $subaccount_id"
+
+    # Wait for async subaccount creation to end
+    log "Waiting for subaccount creation to complete ..."
+    # Since the creation is asynchronous, use sleep for simplicity
+    sleep "$delay"
+
+    # Create a CF environment in the new subaccount
+    create_cf_environment "$subaccount" "$subaccount_id" "${subaccount}_org"
+
+  done
+
+  # Pick the first subaccount/org for further processing
+  org="$(echo "$subaccounts" | cut -d' ' -f 1)_org"
+
+  # Authenticate with Cloud Foundry
+  login_cf "$user" "$pass" "$region" "$org"
+
+  # Create new space and target it
+  create_new_space "$org" "$space"
+
+  # Create HANA Cloud trial service instance in targeted space
+  echo Creating HANA Cloud trial service ...
+  cf create-service hana-cloud-trial hana hana_instance \
+    -c '
+      {
+        "data": {
+          "edition": "cloud",
+          "memory": 30,
+          "serviceStopped": false,
+          "storage": 120,
+          "systempassword": "Init2020",
+          "vcpu": 0,
+          "versionIndicator": "",
+          "whitelistIPs": []
+        }
+      }'
+
+}
+
+# Execute the main function
+main "$@"
+
