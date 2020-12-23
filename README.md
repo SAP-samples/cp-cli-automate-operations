@@ -18,10 +18,7 @@ Since the script is a bash shell script, an UNIX-like environment is required, s
 After downloading, change the file extension to `.sh`.
 
 ## How to obtain support
-In the tutorial, you can use the option "Provide Feedback". Otherwise, you can contact the author at michal.keidar@sap.com.
-
-## Contribution
-Since this script goes hand in hand with the aforementioned tutorial, the script is provided as-is. However, feel free to use the support options listed above.
+In the tutorial, you can use the option "Provide Feedback".
 
 ## License
 Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved. This project is licensed under the Apache Software License, version 2.0 except as noted otherwise in the [LICENSE](LICENSES/Apache-2.0.txt) file.
