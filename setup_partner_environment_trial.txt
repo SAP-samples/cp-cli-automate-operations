@@ -119,9 +119,9 @@ create_cf_environment() {
     sapcp create accounts/environment-instance \
       --subaccount "$subaccount_id" \
       --environment cloudfoundry \
-      --display-name "$display_name"
-	  --service cloudfoundry \
-	  --plan standard
+      --display-name "$display_name" \
+      --service cloudfoundry \
+      --plan standard
 
 }
 
