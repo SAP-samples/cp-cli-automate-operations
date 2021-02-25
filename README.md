@@ -1,14 +1,14 @@
 # Automate Operations with CLI
 
 ## Description
-This example script is a companion to the tutorial "Automate Operations with the Command-Line Interface (CLI)".
+This example script is a companion to the tutorial "Automate Account Operations with the Command Line Interface (CLI)".
 For complete information, see the tutorial on developers.sap.com.
 
-With this example for the CLI for SAP Cloud Platform, you can automate the setting up of new development environments.
-This includes the creation of a directory, subaccounts and entitlements, as well as a Cloud Foundry space and an instance of the HANA Cloud service in the space.
+With this example for the CLI for SAP BTP, you can automate the setting up of new development environments.
+This includes the creation of a directory, subaccounts and entitlements, as well as a Cloud Foundry space and an instance of the SAP HANA Cloud service in the space.
 
 ## Requirements
-You should have a Trial account on SAP Cloud Platform.
+You should have a Trial account on SAP BTP.
 
 You need to have the cf CLI installed.
 
