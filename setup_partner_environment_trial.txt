@@ -28,7 +28,7 @@ login_sapcp() {
   local region=$3
   local subdomain=$4
 
-  log Authenticating with SAP Cloud Platform
+  log Authenticating with SAP BTP
   sapcp login \
     --url "https://cpcli.cf.${region}.hana.ondemand.com" \
     --subdomain "$subdomain" \
@@ -162,13 +162,13 @@ main() {
   # Define local variables
   local user pass directory_id subaccount subaccount_id org
 
-  # Obtain credentials for SAP CP / CF
-  echo Please enter your SAP Cloud Platform credentials
+  # Obtain credentials for SAP BTP / CF
+  echo Please enter your SAP BTP credentials
   read -r -p 'Email: ' user
   read -r -s -p 'Password: ' pass
   echo
 
-  # Authenticate with SAP Cloud Platform
+  # Authenticate with SAP BTP
   login_sapcp "$user" "$pass" "$region" "$global_account_subdomain"
 
   # Create new directory
@@ -212,8 +212,8 @@ main() {
   # Create new space and target it
   create_new_space "$org" "$space"
 
-  # Create HANA Cloud trial service instance in targeted space
-  echo Creating HANA Cloud trial service ...
+  # Create SAP HANA Cloud trial service instance in targeted space
+  echo Creating SAP HANA Cloud trial service ...
   cf create-service hana-cloud-trial hana hana_instance \
     -c '
       {
