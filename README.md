@@ -1,5 +1,7 @@
 # Automate Operations with CLI
 
+[![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/cp-cli-automate-operations)](https://api.reuse.software/info/github.com/SAP-samples/cp-cli-automate-operations)
+
 ## Description
 This example script is a companion to the tutorial "Automate Account Operations with the Command Line Interface (CLI)".
 For complete information, see the tutorial on developers.sap.com.
@@ -22,6 +24,3 @@ In the tutorial, you can use the option "Provide Feedback".
 
 ## License
 Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved. This project is licensed under the Apache Software License, version 2.0 except as noted otherwise in the [LICENSE](LICENSES/Apache-2.0.txt) file.
-
-[![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/cp-cli-automate-operations)](https://api.reuse.software/info/github.com/SAP-samples/cp-cli-automate-operations)
-
