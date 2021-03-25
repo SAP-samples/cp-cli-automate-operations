@@ -21,7 +21,7 @@ log() {
   echo -e "${yellow}$*${no_color}"
 }
 
-login_sapcp() {
+login_btp() {
 
   local user=$1
   local pass=$2
@@ -29,7 +29,7 @@ login_sapcp() {
   local subdomain=$4
 
   log Authenticating with SAP BTP
-  sapcp login \
+  btp login \
     --url "https://cpcli.cf.${region}.hana.ondemand.com" \
     --subdomain "$subdomain" \
     --user "$user" \
@@ -47,7 +47,7 @@ create_directory() {
   local result
 
   result=$(
-    sapcp create accounts/directory \
+    btp create accounts/directory \
       --global-account "$subdomain" \
       --features "$features" \
       --display-name "$name" \
@@ -68,7 +68,7 @@ assign_distributed_entitlement() {
   local plan=$3
 
   log "Initiating distributed entitlement assignments for $service / $plan ..."
-  sapcp assign accounts/entitlement \
+  btp assign accounts/entitlement \
     --to-directory "$directory" \
     --for-service "$service" \
     --plan "$plan" \
@@ -95,7 +95,7 @@ create_subaccount() {
   subdomain=$(generate_id)
 
   result=$(
-    sapcp create accounts/subaccount \
+    btp create accounts/subaccount \
       --display-name "$name" \
       --subdomain "$subdomain" \
       --region "$region" \
@@ -116,7 +116,7 @@ create_cf_environment() {
     local display_name=$3
 
     log "Initiating CF environment creation for $subaccount ..."
-    sapcp create accounts/environment-instance \
+    btp create accounts/environment-instance \
       --subaccount "$subaccount_id" \
       --environment cloudfoundry \
       --display-name "$display_name" \
@@ -169,7 +169,7 @@ main() {
   echo
 
   # Authenticate with SAP BTP
-  login_sapcp "$user" "$pass" "$region" "$global_account_subdomain"
+  login_btp "$user" "$pass" "$region" "$global_account_subdomain"
 
   # Create new directory
   log Initiating directory creation ...
