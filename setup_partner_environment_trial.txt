@@ -119,9 +119,9 @@ create_cf_environment() {
     btp create accounts/environment-instance \
       --subaccount "$subaccount_id" \
       --environment cloudfoundry \
-      --display-name "$display_name" \
       --service cloudfoundry \
-      --plan standard
+      --plan standard \
+      --parameters "{\"instance_name\":\"$display_name\"}"
 
 }
 
