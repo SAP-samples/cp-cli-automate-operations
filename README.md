@@ -10,7 +10,7 @@ With this example for the CLI for SAP BTP, you can automate the setting up of ne
 This includes the creation of a directory, subaccounts and entitlements, as well as a Cloud Foundry space and an instance of the SAP HANA Cloud service in the space.
 
 ## Requirements
-You should have a Trial account on SAP BTP.
+You should have an account on SAP BTP.
 
 You need to have the cf CLI installed.
 
