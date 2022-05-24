@@ -4,8 +4,8 @@
 set -o errexit
 
 # These lines declare global variables that will be used in the script.
-declare region="<enter your trial region, e.g., eu10, us10, ap21>"
-declare global_account_subdomain="<enter your trial global account subdomain, see below where it is located>"
+declare region="<enter your region, e.g., eu10, us10, ap21>"
+declare global_account_subdomain="<enter your global account subdomain, see below where it is located>"
 declare directory_name="<enter a name for the directory of the new project, e.g., Project X>"
 declare directory_description="<enter a description for the directory of the new project, e.g., Directory for project X of partner Y>"
 declare contact_person="<enter the email address of your partner company’s contact person>"
@@ -120,7 +120,7 @@ create_cf_environment() {
       --subaccount "$subaccount_id" \
       --environment cloudfoundry \
       --service cloudfoundry \
-      --plan standard \
+      --plan free \
       --parameters "{\"instance_name\":\"$display_name\"}"
 
 }
@@ -183,8 +183,8 @@ main() {
   log "Directory creation initiated, ID is $directory_id"
 
   # Assign two service entitlements to the directory, that will be auto assigned to its subaccounts
-  assign_distributed_entitlement "$directory_id" alert-notification standard
-  assign_distributed_entitlement "$directory_id" hana-cloud-trial hana
+  assign_distributed_entitlement "$directory_id" alert-notification free
+  assign_distributed_entitlement "$directory_id" hana-cloud hana-free
 
   # Create the dev, test, prod subaccounts in the directory
   log Initiating creation of subaccounts ...
@@ -212,9 +212,9 @@ main() {
   # Create new space and target it
   create_new_space "$org" "$space"
 
-  # Create SAP HANA Cloud trial service instance in targeted space
-  echo Creating SAP HANA Cloud trial service ...
-  cf create-service hana-cloud-trial hana hana_instance \
+  # Create SAP HANA Cloud service instance in targeted space
+  echo Creating SAP HANA Cloud service ...
+  cf create-service hana-cloud hana-free hana_instance \
     -c '
       {
         "data": {
